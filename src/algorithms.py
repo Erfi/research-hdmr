@@ -111,3 +111,5 @@ def sigma_f2d(f0, f1d, f2d, datum):
                      - (f1d[dim2_index](datum[dim2_index]) - f0) \
                      - f0
     return total
+
+

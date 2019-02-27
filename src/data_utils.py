@@ -7,17 +7,17 @@ Description: Utility functions related to data and data generations
 import numpy as np
 
 
-def create_1d_data(x_range, num_dim, cut_center):
+def create_1d_data(x_range, cut_center):
     """
     Args:
         x_range: A tuple of (x_start, x_end, x_step)
-        num_dim: total number of dimentions for the datapoints
         cut_center: a list of num_dim
 
     Return:
         An ndarray of k*num_dim.
     """
     x = np.arange(*x_range)
+    num_dim = len(cut_center)
     data = []
     for i in range(0, num_dim):
         for val in x:
@@ -27,18 +27,18 @@ def create_1d_data(x_range, num_dim, cut_center):
     return np.array(data)
 
 
-def create_2d_data(x1_range, x2_range, num_dim, cut_center):
+def create_2d_data(x1_range, x2_range, cut_center):
     """
     Args:
         x1_range, x2_range: A tuple of (xi_start, xi_end, xi_step)
-        num_dim: Total number of dimentions for data points
-        cut_center: A list of num_dim
+        cut_center: A list of size num_dim
     Return:
         An ndarray of shape k*num_dim
     """
     x1 = np.arange(*x1_range)
     x2 = np.arange(*x2_range)
     xx1, xx2 = np.meshgrid(x1, x2)
+    num_dim = len(cut_center)
     data = []
     for i in range(0, num_dim-1):
         for j in range(i+1,num_dim):

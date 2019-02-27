@@ -12,7 +12,7 @@ class SingleCutTest(unittest.TestCase):
             return np.array([datum[0] + 2 * datum[1] for datum in x]).reshape(-1, 1)
 
         cut_center = [1, 2]
-        x_train = create_1d_data(x_range=(-5, 6, 0.5), num_dim=2, cut_center=cut_center)
+        x_train = create_1d_data(x_range=(-5, 6, 0.5), cut_center=cut_center)
         y = f(x_train)
 
         # -----functions-----
@@ -33,8 +33,8 @@ class SingleCutTest(unittest.TestCase):
 
         # ----creating training data----
         cut_center = [0, 0, 0]
-        x_1d = create_1d_data(x_range=(-3, 4, 0.5), num_dim=3, cut_center=cut_center)
-        x_2d = create_2d_data(x1_range=(-3, 4, 0.5), x2_range=(-3, 4, 0.5), num_dim=3, cut_center=cut_center)
+        x_1d = create_1d_data(x_range=(-3, 4, 0.5), cut_center=cut_center)
+        x_2d = create_2d_data(x1_range=(-3, 4, 0.5), x2_range=(-3, 4, 0.5), cut_center=cut_center)
         y_1d = f(x_1d)
         y_2d = f(x_2d)
 
@@ -59,9 +59,9 @@ class SingleCutTest(unittest.TestCase):
 
         # ----creating training data----
         cut_center = [-0.1, 0.4, -0.3, 0.2, 0.28]
-        x_1d = create_1d_data(x_range=(-4, 10, 0.5), num_dim=5, cut_center=cut_center)
+        x_1d = create_1d_data(x_range=(-4, 10, 0.5), cut_center=cut_center)
         x_2d = create_2d_data(x1_range=(-4, 10, 0.5), x2_range=(-4, 10, 0.5),
-                              num_dim=5, cut_center=cut_center)
+                              cut_center=cut_center)
         y_1d = f(x_1d)
         y_2d = f(x_2d)
 
