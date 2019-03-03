@@ -5,6 +5,7 @@ Description: Utility functions related to data and data generations
 """
 
 import numpy as np
+from data_classes import DatasetInfo
 
 
 def create_1d_data(x_range, cut_center):
@@ -40,8 +41,8 @@ def create_2d_data(x1_range, x2_range, cut_center):
     xx1, xx2 = np.meshgrid(x1, x2)
     num_dim = len(cut_center)
     data = []
-    for i in range(0, num_dim-1):
-        for j in range(i+1,num_dim):
+    for i in range(0, num_dim - 1):
+        for j in range(i + 1, num_dim):
             for k, l in zip(xx1.flatten(), xx2.flatten()):
                 datum = cut_center.copy()
                 datum[i] += k
@@ -57,7 +58,7 @@ def all_1d(x):
     Args:
         x: An -1*n ndarray.
     """
-    return np.all([np.count_nonzero(p)==1 for p in x])
+    return np.all([np.count_nonzero(p) == 1 for p in x])
 
 
 def all_2d(x):
@@ -67,5 +68,18 @@ def all_2d(x):
     Args:
         x: An -1*n ndarray.
     """
-    return np.all([np.count_nonzero(p)==2 for p in x])
+    return np.all([np.count_nonzero(p) == 2 for p in x])
 
+
+def create_interpolation_data(dataset_info: DatasetInfo) -> np.ndarray:
+    assert dataset_info.varying_index != dataset_info.fixed_index, 'varying index cannot be the same as the fixed index'
+    single_axis_data = np.arange(*dataset_info.data_range)
+    dataset = np.repeat([dataset_info.primary_cut_center], len(single_axis_data), axis=0)
+    if dataset_info.secondary_cut_center:
+        dataset[:, dataset_info.fixed_index] = dataset_info.secondary_cut_center[dataset_info.fixed_index]
+        dataset[:, dataset_info.varying_index] = single_axis_data + dataset_info.secondary_cut_center[
+            dataset_info.varying_index]
+    else:
+        dataset[:, dataset_info.varying_index] = single_axis_data + dataset_info.primary_cut_center[
+            dataset_info.varying_index]
+    return dataset
