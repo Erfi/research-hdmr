@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from data_classes import DatasetInfo
-from data_utils import create_interpolation_data
+from data_utils import create_interpolation_data, create_data_dict
 
 class SingleCutWithApproximationTest(unittest.TestCase):
 
@@ -30,6 +30,21 @@ class SingleCutWithApproximationTest(unittest.TestCase):
         # ----expectation----
         expectation = np.array([[1.1, 1.2, 2.3], [2.1, 1.2, 2.3]])
         self.assertTrue(np.allclose(dset, expectation))
+
+
+    def test_create_data_dictionary(self):
+        cc1 = [0,0,0]
+        cc2 = [1,1,1]
+        data_range = [-1,2, 1]
+        def f(x):
+            return np.array([datum[0] * np.sin(datum[1]) + datum[1] + datum[2] for datum in x]).reshape(-1, 1)
+
+        data_dict = create_data_dict(data_range=data_range,
+                                     f=f,
+                                     primary_cut_center=cc1,
+                                     secondary_cut_center=cc2)
+        self.assertEqual(len(data_dict), 9)
+
 
 
 
