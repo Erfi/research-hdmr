@@ -6,7 +6,8 @@ Description: The core algorithms and related functions
 import numpy as np
 from scipy.interpolate import interp1d, interp2d
 
-from data_utils import all_1d, all_2d
+from data_classes import KeyInfo
+from data_utils import all_1d, all_2d, create_key
 
 
 def create_interp_1d_funcs(x, y, cut_center):
@@ -113,3 +114,72 @@ def sigma_f2d(f0, f1d, f2d, datum):
     return total
 
 
+def create_interp_dict(data_dict: dict) -> dict:
+    interp_dict = {}
+    for key, value in data_dict.items():
+        varying_index = get_varying_index_from_key(key)
+        varying_axis_data = value.X[:, varying_index]
+        interp_dict[key] = interp1d(varying_axis_data.flatten(), value.Y.flatten(), assume_sorted=False,  kind='cubic')
+
+    return interp_dict
+
+
+def get_varying_index_from_key(key: str) -> int:
+    return int(key.split('_')[1])
+
+
+def sigma_1d(f0, primary_cut_center, interp_dict, test_point):
+    total = 0
+    n = len(primary_cut_center)
+    for i in range(n):
+        key_info = KeyInfo(primary_cut_center=primary_cut_center, varying_index=i)
+        key = create_key(key_info)
+        interp_func = interp_dict[key]
+        total += interp_func(test_point[i]) - f0
+    return total
+
+
+def sigma_2d_approx(primary_f0, secondary_f0s, primary_cut_center, secondary_cut_center, interp_dict, test_point):
+    total = 0
+    n = len(primary_cut_center)
+    for i in range(0, n - 1, 1):
+        for j in range(i + 1, n, 1):
+            key_info_i = KeyInfo(primary_cut_center, i)
+            key_info_j = KeyInfo(primary_cut_center, j)
+            key_i = create_key(key_info_i)
+            key_j = create_key(key_info_j)
+            interp_func_i = interp_dict[key_i]
+            interp_func_j = interp_dict[key_j]
+
+            cc = primary_cut_center.copy()
+            cc[i] = secondary_cut_center[i]
+            cc[j] = secondary_cut_center[j]
+            key_info = KeyInfo(primary_cut_center=cc, varying_index=None)
+            key = create_key(key_info)
+            secondary_f0 = secondary_f0s[key]
+
+            total += f2d_approx(secondary_f0, i, j, primary_cut_center, secondary_cut_center, interp_dict, test_point) - \
+                     (interp_func_i(test_point[i]) - primary_f0) - \
+                     (interp_func_j(test_point[j]) - primary_f0) - \
+                     primary_f0
+    return total
+
+
+def f2d_approx(f0, i, j, primary_cut_center, secondary_cut_center, interp_dict, test_point):
+    total = f0
+    for k in range(2):
+        if k == 0:
+            varying_index = i
+            fixed_index = j
+        else:
+            varying_index = j
+            fixed_index = i
+
+        key_info = KeyInfo(primary_cut_center=primary_cut_center,
+                           varying_index=varying_index,
+                           secondary_cut_center=secondary_cut_center,
+                           fixed_index=fixed_index)
+        key = create_key(key_info)
+        interp_func = interp_dict[key]
+        total += interp_func(test_point[varying_index]) - f0
+    return total

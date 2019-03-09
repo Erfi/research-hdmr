@@ -73,7 +73,7 @@ def all_2d(x):
 
 def create_data_dict(data_range, f, primary_cut_center, secondary_cut_center):
     """
-    creates a dictionary of TrainingSets
+    creates a dictionary of TrainingSets (n+2*nChoose2 bins)
     :param data_range: python list [start, end, step]
     :param f: ground truth function reference. f takes an ndarray of points.
     :param primary_cut_center: python list e.g. [0, 0, 1]
@@ -82,6 +82,8 @@ def create_data_dict(data_range, f, primary_cut_center, secondary_cut_center):
     """
     data_dict = {}
     n = len(primary_cut_center)
+
+    # n bins for original 1D interpolation functions
     for i in range(n):
         dataset_info = DatasetInfo(data_range, primary_cut_center, i)
         key_info = KeyInfo(primary_cut_center, i)
@@ -92,7 +94,8 @@ def create_data_dict(data_range, f, primary_cut_center, secondary_cut_center):
         key = create_key(key_info)
         data_dict[key] = training_set
 
-    for i in range(0, n - 1, 1):
+    # 2 * nChoose2 bins for approximate 1D interpolation functions
+    for i in range(0, n - 1, 1): #
         for j in range(i + 1, n, 1):
             for k in range(2):
                 if k == 0:
@@ -138,3 +141,16 @@ def create_key(key_info: KeyInfo) -> str:
     key = f'{key_info.primary_cut_center}_{key_info.varying_index}_{key_info.secondary_cut_center}_{key_info.fixed_index}'.replace(' ', '')
     return key
 
+
+def create_approx_cut_center_dict(primary_cut_center, secondary_cut_center, f):
+    n = len(primary_cut_center)
+    cc_dict = {}
+    for i in range(0, n-1, 1):
+        for j in range(i+1, n, 1):
+            cc = primary_cut_center.copy()
+            cc[i] = secondary_cut_center[i]
+            cc[j] = secondary_cut_center[j]
+            key_info = KeyInfo(primary_cut_center=cc, varying_index=None)
+            key = create_key(key_info)
+            cc_dict[key] = f(np.array([cc]))
+    return cc_dict
