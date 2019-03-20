@@ -1,6 +1,9 @@
 import unittest
 
 import numpy as np
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.tri as mtri
 
 from data_classes import DatasetInfo
 from data_utils import create_interpolation_data, create_data_dict, create_approx_cut_center_dict
@@ -52,7 +55,7 @@ class SingleCutWithApproximationTest(unittest.TestCase):
         def f(x):
             return np.array([datum[0] * np.sin(datum[1]) + datum[1] + datum[2] for datum in x]).reshape(-1, 1)
 
-        cc1 = [0.0, 0.0, 0.0]
+        cc1 = [0.1, 0.2, -0.1]
         cc2 = [1.0, 1.0, 1.0]
         f0_1 = f(np.array([cc1]))
         f0_2s = create_approx_cut_center_dict(primary_cut_center=cc1, secondary_cut_center=cc2, f=f)
@@ -73,8 +76,30 @@ class SingleCutWithApproximationTest(unittest.TestCase):
                                      interp_dict=interp_dict,
                                      test_point=test_point)
 
+
         print(f'y_true: {y_true}')
         print(f'y_estimate: {y_estimate}')
+
+
+    def test_3d_plot(self):
+        x1 = np.arange(-5,5,1)
+        x2 = np.arange(-5,5,1)
+        xx1, xx2 = np.meshgrid(x1, x2)
+        xx1, xx2 = xx1.flatten(), xx2.flatten()
+        z = 0.1*(xx1 * np.sin(xx2/10))
+
+        fig = plt.figure()
+        tri = mtri.Triangulation(xx1, xx2)
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+
+        # ax.plot_trisurf(xx1, xx2, z, triangles=tri.triangles, cmap=plt.cm.Spectral)
+        ax.plot_trisurf(tri, z, cmap=plt.cm.Spectral)
+
+        ax.set_zlim(-1, 1)
+        plt.show()
+
+
+
 
 
 if __name__ == "__main__":
